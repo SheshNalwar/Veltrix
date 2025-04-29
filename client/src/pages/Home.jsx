@@ -39,7 +39,7 @@ export const Home = () => {
               <div
                 style={{ width: "100%", height: "800px", position: "relative" }}
               >
-                {/* Add the text overlay */},
+                {/* Add the text overlay */}
                 <div
                   style={{
                     position: "absolute",
@@ -72,7 +72,7 @@ export const Home = () => {
       <style jsx>{`
         @font-face {
           font-family: "Custom";
-          src: url("../fonts/playfair-display.italic.ttf") format("truetype");
+          src: url("/fonts/playfair-display.italic.ttf") format("truetype");
         }
         .Home_container {
           display: flex;

@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import "./Features.css"
 
 export const Features = () => {
   // Array of feature data
