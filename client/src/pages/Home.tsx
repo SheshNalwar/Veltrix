@@ -1,4 +1,3 @@
-import React from "react";
 import { Navbar } from "../components/Navbar";
 import CarouselComponent from "../components/Carousel";
 import { Features } from "../components/Features";
@@ -7,7 +6,7 @@ import Orb from "../components/OrbBtn";
 export const Home = () => {
   return (
     <>
-      <div style={{ backgroundColor: "rgb(0, 0, 0)" }}>
+      <div style={{ backgroundColor: "#0C0C0F" }}>
         <Navbar></Navbar>
         <div className="Home_container">
           <div className="home_heading">
@@ -69,7 +68,7 @@ export const Home = () => {
           </div>
         </div>
       </div>
-      <style jsx>{`
+      <style>{`
         @font-face {
           font-family: "Custom";
           src: url("/fonts/playfair-display.italic.ttf") format("truetype");

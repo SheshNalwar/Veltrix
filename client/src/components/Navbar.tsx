@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -8,7 +8,7 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="nav_main">
+    <div className="nav_main" >
       <div className="nav_logo">Veltrix AI</div>
       <div className={`nav_items_wrapper ${isMenuOpen ? 'open' : ''}`}>
         <div className="nav_items">Docs</div>
