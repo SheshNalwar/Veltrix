@@ -1,0 +1,134 @@
+import React, { useState } from 'react';
+import './Navbar.css';
+
+export const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  return (
+    <div className="nav_main">
+      <div className="nav_logo">Veltrix AI</div>
+      <div className={`nav_items_wrapper ${isMenuOpen ? 'open' : ''}`}>
+        <div className="nav_items">Docs</div>
+        <div className="nav_items">Pricing</div>
+        <div className="nav_login">
+          <div className="login_btn">Login</div>
+        </div>
+      </div>
+      <div className="hamburger_menu" onClick={toggleMenu}>
+        <div className="bar"></div>
+        <div className="bar"></div>
+        <div className="bar"></div>
+      </div>
+      <style>
+        {`
+          .nav_main {
+            background-color: rgba(7, 7, 7, 0.2);
+            color: white;
+            width: 100%;
+            height: 112px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 43px;
+            position: sticky;
+            font-family: "Roboto", sans-serif;
+            backdrop-filter: blur(10px);
+            top: 0;
+            z-index: 1;     
+        }
+
+        .nav_logo {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .nav_items_wrapper {
+            display: flex;
+            gap: 114px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav_items {
+            font-size: 20px;
+            color: white;
+            line-height: 150%;
+            height: fit-content;
+        }
+
+        .nav_login {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .login_btn {
+            background-color: #6237FD;
+            width: 130px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+
+        /* Hamburger Menu */
+        .hamburger_menu {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .hamburger_menu .bar {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .nav_items_wrapper {
+              display: none;
+              flex-direction: column;
+              gap: 20px;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              width: 100%;
+              padding: 20px;
+              align-items: flex-start;
+              padding-left: 10%;
+              
+
+            }
+          
+            .nav_items_wrapper.open {
+              display: flex;
+              background-color: rgba(0, 0, 0, 0.4);
+              backdrop-filter: blur(10px);          /* Enable blur effect */
+              -webkit-backdrop-filter: blur(10px);  /* For Safari support */
+              z-index: 10000;
+            }
+          
+            .hamburger_menu {
+              display: flex;
+            }
+          
+            .login_btn {
+              width: 100px;
+              height: 40px;
+              font-size: 16px;
+            }
+          }
+  
+        `}
+      </style>
+    </div>
+  );
+};
