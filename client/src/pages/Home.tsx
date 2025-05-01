@@ -1,13 +1,54 @@
+import { useState, useEffect } from "react";
 import { Navbar } from "../components/Navbar";
 import CarouselComponent from "../components/Carousel";
 import { Features } from "../components/Features";
 import Orb from "../components/OrbBtn";
+import axios from "axios";
+import { BACKEND_URL } from '../config';
 
 export const Home = () => {
+  const [isServerOffline, setIsServerOffline] = useState(false);
+
+  // Function to check if the server is online
+  const checkServerStatus = async () => {
+    try {
+      await axios.get(`${BACKEND_URL}/health`);
+      setIsServerOffline(false); // Server is online
+    } catch (error) {
+      console.error("Server is offline:", error);
+      setIsServerOffline(true); // Server is offline
+    }
+  };
+
+  useEffect(() => {
+    // Check server status immediately
+    checkServerStatus();
+
+    // Set up an interval to check server status every 5 seconds
+    const interval = setInterval(() => {
+      checkServerStatus();
+    }, 5000);
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
   return (
     <>
       <div style={{ backgroundColor: "#0C0C0F" }}>
-        <Navbar></Navbar>
+        <Navbar />
+        {isServerOffline && (
+          <div
+            style={{
+              backgroundColor: "red",
+              color: "white",
+              textAlign: "center",
+              padding: "10px",
+              fontWeight: "bold",
+            }}
+          >
+            The server is currently offline. Please try again later.
+          </div>
+        )}
         <div className="Home_container">
           <div className="home_heading">
             Making of Incredible <br />
@@ -108,13 +149,8 @@ export const Home = () => {
         }
         .carousel_wrapper {
           width: 100%;
-          /* max-width: 1200px; */
           margin: 0 auto;
         }
-        /* .slick-center div {
-    transform: scale(1.1); 
-    transition: transform 0.3s ease;
-} */
 
         .get_start_wrapper {
           width: 100%;

@@ -1,11 +1,12 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
 import { XMarkIcon, PencilIcon } from '@heroicons/react/24/solid';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import UpdateInfoModal from './updateModal';
 
 type User = {
+  id: string;
   fullName: string;
   email: string;
   imageUrl: string;
@@ -15,15 +16,40 @@ type AccountModalProps = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   user?: User;
+  onUserUpdate?: () => void; // New callback prop
 };
 
-export default function AccountModal({ isOpen, setIsOpen, user }: AccountModalProps) {
+export default function AccountModal({ isOpen, setIsOpen, user, onUserUpdate }: AccountModalProps) {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const { signOut } = useClerk();
+  const { user: clerkUser} = useUser();
   const navigate = useNavigate();
+  
+  // If user prop isn't provided, use clerk user directly
+  const userForDisplay = user || (clerkUser ? {
+    id: clerkUser.id,
+    fullName: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+    email: clerkUser.primaryEmailAddress?.emailAddress || '',
+    imageUrl: clerkUser.imageUrl || ''
+  } : undefined);
 
   const handleSignOut = () => {
     signOut(() => navigate('/home'));
+  };
+  
+  // Handle successful update
+  const handleSuccessfulUpdate = () => {
+    setShowUpdateModal(false);
+    
+    // Call the parent callback if provided
+    if (onUserUpdate) {
+      onUserUpdate();
+    }
+    
+    // Force a refresh of clerk user data
+    if (clerkUser) {
+      clerkUser.reload();
+    }
   };
 
   return (
@@ -55,12 +81,18 @@ export default function AccountModal({ isOpen, setIsOpen, user }: AccountModalPr
                 <div className="flex justify-between">
                   <div className="w-3/4 pl-6 space-y-4">
                     <div className="flex items-center space-x-4">
-                      {user?.imageUrl && (
-                        <img src={user.imageUrl} alt="avatar" className="h-12 w-12 rounded-full" />
+                      {userForDisplay?.imageUrl && (
+                        <img 
+                          src={userForDisplay.imageUrl} 
+                          alt="avatar" 
+                          className="h-12 w-12 rounded-full"
+                          // Add cache-busting parameter
+                          key={new Date().getTime()}
+                        />
                       )}
                       <div>
-                        <p className="font-semibold">{user?.fullName}</p>
-                        <p className="text-sm text-gray-600">{user?.email}</p>
+                        <p className="font-semibold">{userForDisplay?.fullName}</p>
+                        <p className="text-sm text-gray-600">{userForDisplay?.email}</p>
                       </div>
                     </div>
 
@@ -95,9 +127,16 @@ export default function AccountModal({ isOpen, setIsOpen, user }: AccountModalPr
       </Transition>
 
       {showUpdateModal && (
-        <UpdateInfoModal onClose={() => setShowUpdateModal(false)} />
+        <UpdateInfoModal 
+          onClose={() => setShowUpdateModal(false)} 
+          onSuccess={handleSuccessfulUpdate}
+          user={clerkUser ? {
+            id: clerkUser.id,
+            fullName: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+            profileImageUrl: clerkUser.imageUrl
+          } : undefined}
+        />
       )}
     </>
   );
 }
-
