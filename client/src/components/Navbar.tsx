@@ -1,7 +1,18 @@
-import  { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import AccountModal from "./Auth/AccountModal"
+import Auth from '../pages/Login';
+
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [checkSign, setCheckSign] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    setCheckSign(!checkSign);
+  }, [isSignedIn])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -14,7 +25,18 @@ export const Navbar = () => {
         <div className="nav_items">Docs</div>
         <div className="nav_items">Pricing</div>
         <div className="nav_login">
-          <div className="login_btn">Login</div>
+          <div className="login_btn">
+            {isSignedIn ? (
+              <img
+                src={user?.imageUrl || "/image.png"} // Fallback to a default profile image
+                alt="Profile"
+                onClick={() => setIsOpen(true)}
+                className="h-10 w-10 rounded-full cursor-pointer"
+              />
+            ) : (
+              <Auth /> // Show Auth component only if the user is not signed in
+            )}
+          </div>
         </div>
       </div>
       <div className="hamburger_menu" onClick={toggleMenu}>
@@ -22,6 +44,18 @@ export const Navbar = () => {
         <div className="bar"></div>
         <div className="bar"></div>
       </div>
+      {/* Account Modal */}
+      {isSignedIn && (
+        <AccountModal
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          user={{
+            fullName: user?.fullName || "Unknown User", // Fallback to "Unknown User" if fullName is null/undefined
+            email: user?.emailAddresses[0]?.emailAddress || "No Email", // Fallback to "No Email"
+            imageUrl: user?.imageUrl || "/image.png", // Fallback to a default profile image
+          }}
+        />
+      )}
       <style>
         {`
           .nav_main {
@@ -65,7 +99,6 @@ export const Navbar = () => {
         }
 
         .login_btn {
-            background-color: #6237FD;
             width: 130px;
             height: 55px;
             display: flex;
