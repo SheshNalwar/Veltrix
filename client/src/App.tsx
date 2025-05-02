@@ -4,8 +4,8 @@ import BuilderPage from './pages/BuilderPage';
 import { BuilderProvider } from './context/BuilderContext';
 import {Home} from './pages/Home'
 import Auth from "./pages/Login"
-import ClerkUsers from './components/Auth/user';
-import UpdateName from './components/Auth/user';
+// import ClerkUsers from './components/Auth/User';
+// import UpdateName from './components/Auth/User';
 
 function App() {
 
@@ -18,8 +18,8 @@ function App() {
             <Route path="/builder" element={<BuilderPage />} />
             <Route path="/home" element={<Home/>} />
             <Route path="/auth" element={<Auth/>} />
-            <Route path="/auth/users" element={<ClerkUsers/>} />
-            <Route path="/auth/upadateUser" element={<UpdateName/>} />
+            {/* <Route path="/auth/users" element={<ClerkUsers/>} />
+            <Route path="/auth/upadateUser" element={<UpdateName/>} /> */}
 
           </Routes>
         </div>

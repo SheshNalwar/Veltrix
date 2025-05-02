@@ -6,8 +6,8 @@ import { updateUser, userUpdateMiddleware } from '../controllers/updateUser.cont
 
 const router = express.Router();
 
-// router.route("/template").post(templateController);
-// router.route("/chat").post(chatController);
+router.route("/template").post(templateController);
+router.route("/chat").post(chatController);
 router.route("/users").get(getClerkUsers); 
 router.get('/health', (req, res) => {
     res.status(200).send({ status: 'OK' });

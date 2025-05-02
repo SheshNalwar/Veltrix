@@ -11,8 +11,13 @@ import { BACKEND_URL } from "../config";
 import { parseXML } from "../steps";
 import { FileNode, Step, StepType } from "../types";
 import { v4 as uuidv4 } from "uuid";
+import { useWebContainer } from "../hooks/useWebContainer";
+import { PreviewFrame } from "../components/PreviewFrame";
+
 const BuilderPage: React.FC = () => {
   const { prompt, activeFile, steps, setSteps } = useBuilder();
+
+  const webcontainer = useWebContainer();
 
   const [view, setView] = useState<"code" | "preview">("code");
 
@@ -95,6 +100,56 @@ const BuilderPage: React.FC = () => {
     }
   }, [steps, setSteps]);
 
+  useEffect(() => {
+    const createMountStructure = (files: FileNode[]): Record<string, any> => {
+      const mountStructure: Record<string, any> = {};
+
+      const processFile = (file: FileNode, isRootFolder: boolean) => {
+        if (file.type === "folder") {
+          // For folders, create a directory entry
+          mountStructure[file.name] = {
+            directory: file.children
+              ? Object.fromEntries(
+                  file.children.map((child) => [
+                    child.name,
+                    processFile(child, false),
+                  ])
+                )
+              : {},
+          };
+        } else if (file.type === "file") {
+          if (isRootFolder) {
+            mountStructure[file.name] = {
+              file: {
+                contents: file.content || "",
+              },
+            };
+          } else {
+            // For files, create a file entry with contents
+            return {
+              file: {
+                contents: file.content || "",
+              },
+            };
+          }
+        }
+
+        return mountStructure[file.name];
+      };
+
+      // Process each top-level file/folder
+      files.forEach((file) => processFile(file, true));
+
+      return mountStructure;
+    };
+
+    const mountStructure = createMountStructure(files);
+
+    // Mount the structure if WebContainer is available
+    console.log(mountStructure);
+    webcontainer?.mount(mountStructure);
+  }, [files, webcontainer]);
+
   const init = async () => {
     const response = await axios.post(`${BACKEND_URL}/template`, {
       prompt: prompt.trim(),
@@ -126,13 +181,12 @@ const BuilderPage: React.FC = () => {
 
     console.log("step response:", stepResponse.data);
 
-    const {uiPrompts: stepUiPrompts} = stepResponse.data;
+    const { uiPrompts: stepUiPrompts } = stepResponse.data;
     // console.log("stepUiPrompts:", stepUiPrompts);
     // console.log("stepUI prompts", typeof stepUiPrompts[0]);
-    
-    const parsedSteps = parseXML(stepUiPrompts[0])
-      console.log("parsedSteps:", parsedSteps);
-      
+
+    const parsedSteps = parseXML(stepUiPrompts[0]);
+    console.log("parsedSteps:", parsedSteps);
 
     setSteps((s) => [
       ...s,
@@ -148,7 +202,7 @@ const BuilderPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       <header className="bg-gray-900 border-b border-gray-800">
         <div className="container mx-auto px-4 py-4 flex items-center">
           <Link
@@ -184,7 +238,7 @@ const BuilderPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 flex">
+      <main className="h-screen flex-1 flex">
         <div className="w-1/4 bg-gray-900 border-r border-gray-800 overflow-y-auto">
           <StepsList />
         </div>
@@ -206,12 +260,14 @@ const BuilderPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="flex-1 bg-white">
-            <iframe
-              src="/preview"
-              className="w-full h-full border-none"
-              title="Website Preview"
-            />
+          <div className=" h-screen flex-1 bg-white">
+            {webcontainer ? (
+              <PreviewFrame webContainer={webcontainer} files={files} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                <p>Loading WebContainer...</p>
+              </div>
+            )}
           </div>
         )}
       </main>
