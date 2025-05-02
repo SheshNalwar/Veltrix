@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { FileNode, Step } from '../types';
 import { generateMockFileSystem, generateMockSteps } from '../utils/mockData';
+import { buildFileTree } from '../utils/buildFileTree';
 
 interface BuilderContextType {
   prompt: string;
@@ -24,9 +25,13 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const generateWebsite = (prompt: string) => {
     // In a real application, this would call an API to generate content
     // For now, we'll use mock data
-    setPrompt(prompt);
-    setFileSystem(generateMockFileSystem());
-    setSteps(generateMockSteps());
+    
+      setPrompt(prompt);
+      const flatFiles = generateMockFileSystem(); // still flat
+      const tree = buildFileTree(flatFiles); // convert to tree
+      setFileSystem(tree); // set nested files
+      setSteps(generateMockSteps());
+   
   };
 
   return (

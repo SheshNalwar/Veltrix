@@ -1,20 +1,20 @@
 export interface FileNode {
   id: string;
   name: string;
-  type: 'file' | 'folder';
-  content?: string;
-  language?: string;
+  type: "file" | "folder";
   children?: FileNode[];
-  path?: string,
+  content?: string;
+  // language?: string;
+  path: string;
   isOpen?: boolean;
 }
 
 export enum StepType {
-  CreateFile, 
+  CreateFile,
   CreateFolder,
   EditFile,
   DeleteFile,
-  RunScript
+  RunScript,
 }
 
 export interface Step {
@@ -24,4 +24,5 @@ export interface Step {
   description: string;
   completed: boolean;
   code?: string;
+  path?: string;
 }

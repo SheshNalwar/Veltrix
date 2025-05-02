@@ -5,56 +5,52 @@ const chatController = async (req, res) => {
   try {
     const rawMessages = req.body.messages;
 
-    // Validate incoming messages
-    if (!Array.isArray(rawMessages)) {
-      return res
-        .status(400)
-        .json({ error: "Invalid 'messages' format. Expected array." });
+    if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
+      return res.status(400).json({
+        error: "Invalid or empty 'messages'. Please provide input.",
+      });
     }
 
-    if (rawMessages.length === 0) {
-      return res
-        .status(400)
-        .json({
-          code: "You haven't provided anything for me to respond to. Please provide a question, text, code, or something else you'd like me to process.",
-        });
-    }
-
-    // Filter out any empty messages
-    const filteredMessages = rawMessages.filter((message) => {
-      // Keep messages that have non-empty text
-      return message.parts?.some((part) => part.text?.trim().length > 0);
-    });
+    const filteredMessages = rawMessages.filter((message) =>
+      message.parts?.some((part) => part.text?.trim().length > 0)
+    );
 
     if (filteredMessages.length === 0) {
-      return res
-        .status(400)
-        .json({
-          code: "You haven't provided anything for me to respond to. Please provide a question, text, code, or something else you'd like me to process.",
-        });
+      return res.status(400).json({
+        code: "You haven't provided any valid content to respond to.",
+      });
     }
 
-    // Validate message format
     for (const message of filteredMessages) {
-      if (
-        !message.role ||
-        !Array.isArray(message.parts) ||
-        message.parts.length === 0
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Invalid message format. Each message must have a 'role' and 'parts' array with at least one text entry.",
-          });
+      if (!message.role || !Array.isArray(message.parts)) {
+        return res.status(400).json({
+          error:
+            "Invalid message format. Each message must have a 'role' and 'parts' array.",
+        });
       }
     }
 
-    console.log("✅ Messages received:", JSON.stringify(rawMessages, null, 2));
+    // Add instructional message to improve format quality
+    filteredMessages.unshift({
+      role: "user",
+      parts: [
+        {
+          text: `
+Please respond with valid XML only, using <boltArtifact> and <boltAction> tags.
+Do not use markdown code blocks (\`\`\`).
+Only respond with the custom XML structure.
+        `.trim(),
+        },
+      ],
+    });
 
-    // Pass only filtered, valid messages to GenAI
-    const stream = await genAI.models.generateContentStream({
-      model: "gemini-1.5-pro",
+    console.log(
+      "✅ Messages received:",
+      JSON.stringify(filteredMessages, null, 2)
+    );
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.0-flash",
       contents: filteredMessages,
       config: {
         maxOutputTokens: 8000,
@@ -63,32 +59,19 @@ const chatController = async (req, res) => {
       systemInstruction: getSystemPrompt(),
     });
 
-    let finalText = "";
-    for await (const chunk of stream) {
-      const part = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (part) {
-        finalText += part;
-      }
-    }
+    let aiText = response.text.trim();
 
-    console.log("✅ Final AI response:", finalText);
+    // Optional: Remove markdown formatting fences if present
+  aiText = aiText.replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1");
 
-    if (!finalText.trim()) {
-      return res.status(500).json({
-        error:
-          "The AI model returned an empty response. Please try again with a different prompt.",
-      });
-    }
+
+    console.log("✅ Final AI response:", aiText);
 
     res.status(200).json({
-  prompts: [],  // if needed, include actual prompts
-  uiPrompts: [finalText], // wrap finalText in an array as expected by uiPrompts[0]
-});
-
+      uiPrompts: [aiText],
+    });
   } catch (err) {
     console.error("🔥 Error in chatController:", err);
-
-    // Add detailed logging for unknown structures
     if (err instanceof Error) {
       res.status(500).json({ error: err.message, stack: err.stack });
     } else {

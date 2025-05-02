@@ -1,40 +1,32 @@
-import {StepType, Step} from "./types/index.ts"
+import { StepType, Step } from "./types/index.ts";
 import { v4 as uuidv4 } from "uuid";
+
 /*
  * Parse input XML and convert it into steps.
- * Eg: Input -
- * <boltArtifact id=\"project-import\" title=\"Project Files\">
- *  <boltAction type=\"file\" filePath=\"eslint.config.js\">
- *      import js from '@eslint/js';\nimport globals from 'globals';\n
- *  </boltAction>
- * <boltAction type="shell">
- *      node index.js
- * </boltAction>
+ * Example input:
+ * <boltArtifact id="project-import" title="Project Files">
+ *   <boltAction type="file" filePath="eslint.config.js">
+ *     import js from '@eslint/js';\nimport globals from 'globals';
+ *   </boltAction>
+ *   <boltAction type="shell">
+ *     node index.js
+ *   </boltAction>
  * </boltArtifact>
  *
- * Output -
- * [{
- *      title: "Project Files",
- *      status: "Pending"
- * }, {
- *      title: "Create eslint.config.js",
- *      type: StepType.CreateFile,
- *      code: "import js from '@eslint/js';\nimport globals from 'globals';\n"
- * }, {
- *      title: "Run command",
- *      code: "node index.js",
- *      type: StepType.RunScript
- * }]
- *
- * The input can have strings in the middle they need to be ignored
+ * Output:
+ * [
+ *   { ...Project Files Step },
+ *   { ...Step to create eslint.config.js },
+ *   { ...Step to run node index.js }
+ * ]
  */
-
-
 
 export function parseXML(response: string): Step[] {
   const steps: Step[] = [];
+  // console.log(typeof response); // This will show you the type of response.
+  // console.log(response); // This will show the actual response value.
 
-  // 1. Add a base "Project Files" step
+  // 1. Base "Project Files" step
   steps.push({
     id: uuidv4(),
     title: "Project Files",
@@ -43,13 +35,14 @@ export function parseXML(response: string): Step[] {
     completed: false,
   });
 
-  // 2. Use RegEx to extract <boltAction> blocks
-  const actionRegex =
+  // 2. Extract all <boltAction type="file"> elements
+  const fileActionRegex =
     /<boltAction[^>]*type="file"[^>]*filePath="([^"]+)"[^>]*>([\s\S]*?)<\/boltAction>/g;
   let match;
 
-  while ((match = actionRegex.exec(response)) !== null) {
-    const [, filePath, content] = match;
+  while ((match = fileActionRegex.exec(response)) !== null) {
+    const [_, filePath, content] = match;
+
     steps.push({
       id: uuidv4(),
       title: `Create ${filePath}`,
@@ -57,10 +50,11 @@ export function parseXML(response: string): Step[] {
       description: `Create the file ${filePath}`,
       completed: false,
       code: content.trim(),
+      path: "/" + filePath, // ✅ Add path
     });
   }
 
-  // 3. Optionally detect scripts to run from package.json
+  // 3. Handle package.json scripts
   const packageJsonMatch = response.match(
     /<boltAction[^>]*filePath="package\.json"[^>]*>([\s\S]*?)<\/boltAction>/
   );
@@ -68,6 +62,7 @@ export function parseXML(response: string): Step[] {
     try {
       const packageJson = JSON.parse(packageJsonMatch[1]);
       const scripts = packageJson.scripts || {};
+
       for (const script in scripts) {
         steps.push({
           id: uuidv4(),
@@ -80,6 +75,24 @@ export function parseXML(response: string): Step[] {
       }
     } catch (e) {
       console.warn("Failed to parse package.json", e);
+    }
+  }
+
+  // 4. Handle <boltAction type="shell"> commands (optional)
+  const shellRegex =
+    /<boltAction[^>]*type="shell"[^>]*>([\s\S]*?)<\/boltAction>/g;
+  let shellMatch;
+  while ((shellMatch = shellRegex.exec(response)) !== null) {
+    const shellCode = shellMatch[1].trim();
+    if (shellCode) {
+      steps.push({
+        id: uuidv4(),
+        title: `Run command`,
+        type: StepType.RunScript,
+        description: `Run the command: ${shellCode}`,
+        completed: false,
+        code: shellCode,
+      });
     }
   }
 
