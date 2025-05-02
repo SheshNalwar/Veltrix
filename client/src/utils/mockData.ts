@@ -1,27 +1,28 @@
-import { FileNode, Step } from '../types';
+import { FileNode, Step } from "../types";
 
-import { StepType } from "../types/index.ts"; // adjust the path accordingly
-
+import { StepType } from "../types"; // Adjusted the path to reference the StepType from the correct path
 
 export const generateMockFileSystem = (): FileNode[] => {
   return [
     {
-      id: '1',
-      name: 'src',
-      type: 'folder',
+      id: "1",
+      name: "src",
+      type: "folder",
       isOpen: true,
+      path: "/src", // Added path attribute
       children: [
         {
-          id: '2',
-          name: 'components',
-          type: 'folder',
+          id: "2",
+          name: "components",
+          type: "folder",
           isOpen: false,
+          path: "/src/components", // Added path attribute
           children: [
             {
-              id: '3',
-              name: 'Button.jsx',
-              type: 'file',
-              language: 'jsx',
+              id: "3",
+              name: "Button.jsx",
+              type: "file",
+              path: "/src/components/Button.jsx", // Added path attribute
               content: `import React from 'react';
 
 const Button = ({ children, onClick, variant = 'primary' }) => {
@@ -39,13 +40,13 @@ const Button = ({ children, onClick, variant = 'primary' }) => {
   );
 };
 
-export default Button;`
+export default Button;`,
             },
             {
-              id: '4',
-              name: 'Card.jsx',
-              type: 'file',
-              language: 'jsx',
+              id: "4",
+              name: "Card.jsx",
+              type: "file",
+              path: "/src/components/Card.jsx", // Added path attribute
               content: `import React from 'react';
 
 const Card = ({ title, children }) => {
@@ -57,15 +58,15 @@ const Card = ({ title, children }) => {
   );
 };
 
-export default Card;`
-            }
-          ]
+export default Card;`,
+            },
+          ],
         },
         {
-          id: '5',
-          name: 'App.jsx',
-          type: 'file',
-          language: 'jsx',
+          id: "5",
+          name: "App.jsx",
+          type: "file",
+          path: "/src/App.jsx", // Added path attribute
           content: `import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
@@ -88,13 +89,13 @@ function App() {
   );
 }
 
-export default App;`
+export default App;`,
         },
         {
-          id: '6',
-          name: 'index.jsx',
-          type: 'file',
-          language: 'jsx',
+          id: "6",
+          name: "index.jsx",
+          type: "file",
+          path: "/src/index.jsx", // Added path attribute
           content: `import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -105,21 +106,22 @@ root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-);`
-        }
-      ]
+);`,
+        },
+      ],
     },
     {
-      id: '7',
-      name: 'public',
-      type: 'folder',
+      id: "7",
+      name: "public",
+      type: "folder",
       isOpen: false,
+      path: "/public", // Added path attribute
       children: [
         {
-          id: '8',
-          name: 'index.html',
-          type: 'file',
-          language: 'html',
+          id: "8",
+          name: "index.html",
+          type: "file",
+          path: "/public/index.html", // Added path attribute
           content: `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -131,15 +133,15 @@ root.render(
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
   </body>
-</html>`
-        }
-      ]
+</html>`,
+        },
+      ],
     },
     {
-      id: '9',
-      name: 'package.json',
-      type: 'file',
-      language: 'json',
+      id: "9",
+      name: "package.json",
+      type: "file",
+      path: "/package.json", // Added path attribute
       content: `{
   "name": "my-website",
   "private": true,
@@ -164,10 +166,11 @@ root.render(
     "tailwindcss": "^3.2.4",
     "vite": "^4.1.0"
   }
-}`
-    }
+}`,
+    },
   ];
 };
+
 export const generateMockSteps = (): Step[] => {
   return [
     {
