@@ -25,7 +25,6 @@ export const Navbar = () => {
       <div className={`nav_items_wrapper ${isMenuOpen ? 'open' : ''}`}>
         <div className="nav_items">Docs</div>
         <div className="nav_items"><Link to={"/subcription"}>Pricing</Link> </div>
-        <div className="nav_items"><Link to={"/pricing"}>Test</Link> </div>
         <div className="nav_login">
           <div className="login_btn">
             {isSignedIn ? (

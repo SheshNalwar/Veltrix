@@ -1,6 +1,6 @@
-import { StrictMode } from 'react';
+
 import { createRoot } from 'react-dom/client';
-import App from './App.jsx';
+import App from './App.js';
 import { ClerkProvider } from '@clerk/clerk-react'
 import './index.css';
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY

@@ -5,7 +5,6 @@ import { BuilderProvider } from './context/BuilderContext';
 import {Home} from './pages/Home'
 import Auth from "./pages/Login"
 import PricingPage from './pages/Pricing';
-import PPrice from './components/Ppricing';
 // import ClerkUsers from './components/Auth/User';
 // import UpdateName from './components/Auth/User';
 
@@ -21,7 +20,6 @@ function App() {
             <Route path="/home" element={<Home/>} />
             <Route path="/auth" element={<Auth/>} />
             <Route path="/subcription" element={<PricingPage/>} />
-            <Route path="/pricing" element={<PPrice/>} />
             {/* <Route path="/auth/users" element={<ClerkUsers/>} />
             <Route path="/auth/upadateUser" element={<UpdateName/>} /> */}
 
