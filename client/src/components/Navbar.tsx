@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import AccountModal from "./Auth/AccountModal"
 import Auth from '../pages/Login';
+import { Link } from 'react-router-dom';
 
 
 export const Navbar = () => {
@@ -23,7 +24,8 @@ export const Navbar = () => {
       <div className="nav_logo">Veltrix AI</div>
       <div className={`nav_items_wrapper ${isMenuOpen ? 'open' : ''}`}>
         <div className="nav_items">Docs</div>
-        <div className="nav_items">Pricing</div>
+        <div className="nav_items"><Link to={"/subcription"}>Pricing</Link> </div>
+        <div className="nav_items"><Link to={"/pricing"}>Test</Link> </div>
         <div className="nav_login">
           <div className="login_btn">
             {isSignedIn ? (
@@ -50,6 +52,7 @@ export const Navbar = () => {
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           user={{
+            id: user?.id || "No ID",
             fullName: user?.fullName || "Unknown User", // Fallback to "Unknown User" if fullName is null/undefined
             email: user?.emailAddresses[0]?.emailAddress || "No Email", // Fallback to "No Email"
             imageUrl: user?.imageUrl || "/image.png", // Fallback to a default profile image

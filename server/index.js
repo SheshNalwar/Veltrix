@@ -6,12 +6,17 @@ import { basePrompt as reactBasePrompt } from "./src/defaults/react.js";
 import { BASE_PROMPT } from "./src/prompt.js";
 import cors from "cors";
 import router from "./src/routes/router.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+mongoose.connect(process.env.MONGO_CONNECTION_STRING, )
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 const routes = router;
 

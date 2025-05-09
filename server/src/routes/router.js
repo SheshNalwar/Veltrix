@@ -3,6 +3,7 @@ import templateController from "../controllers/template.controller.js";
 import chatController from "../controllers/chat.controller.js";
 import {getClerkUsers} from "../controllers/clerk.controller.js"; 
 import { updateUser, userUpdateMiddleware } from '../controllers/updateUser.controller.js';
+import { userData } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
@@ -14,5 +15,8 @@ router.get('/health', (req, res) => {
   });
 // Use middleware for handling file uploads before the updateUser controller
 router.route('/users/update').post(userUpdateMiddleware, updateUser);
+
+router.route("/subscription").post(userData);
+
 
 export default router;

@@ -1,5 +1,5 @@
 import { WebContainer } from "@webcontainer/api";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 
 interface PreviewFrameProps {
   files: any[];
@@ -20,10 +20,12 @@ export function PreviewFrame({ files, webContainer }: PreviewFrameProps) {
 
 
   async function main() {
+    console.log("asdf");
+
      const installProcess = await webContainer.spawn("npm", [
        "install",
      ]);
-
+     
      installProcess.output.pipeTo(
        new WritableStream({
          write(data) {
