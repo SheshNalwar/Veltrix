@@ -24,6 +24,7 @@
     "react-slick": "^0.30.3",
     "react-syntax-highlighter": "^15.6.1",
     "slick-carousel": "^1.8.1",
+    "stripe": "^18.1.0",
     "tailwindcss": "^4.1.4",
     "uuid": "^11.1.0"
   },
