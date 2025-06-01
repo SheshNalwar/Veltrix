@@ -17,6 +17,12 @@ import { PreviewFrame } from "../components/PreviewFrame";
 const BuilderPage: React.FC = () => {
   const { prompt, activeFile, steps, setSteps } = useBuilder();
 
+  const [userPrompt, setPrompt] = useState("");
+
+  const [llmMessages, setLLMMessages] = useState<
+    { role: "user" | "assistant"; parts: [{ text: string }] }[]
+  >([]);
+
   const webcontainer = useWebContainer();
 
   const [view, setView] = useState<"code" | "preview">("code");
@@ -154,17 +160,9 @@ const BuilderPage: React.FC = () => {
     const response = await axios.post(`${BACKEND_URL}/template`, {
       prompt: prompt.trim(),
     });
-    // console.log(response.data);
 
     const { prompts, uiPrompts } = response.data;
-    // console.log(prompt.trim());
-    // console.log(uiPrompts[0]);
 
-    // console.log("uiPrompts[0]:", uiPrompts[0]);
-    // const xmlString =
-    //   typeof uiPrompts[0] === "string"
-    //     ? uiPrompts[0]
-    //     : JSON.stringify(uiPrompts[0]);
     setSteps(
       parseXML(uiPrompts[0]).map((x: Step) => ({
         ...x,
@@ -194,6 +192,21 @@ const BuilderPage: React.FC = () => {
         ...x,
         completed: false,
       })),
+    ]);
+
+    setLLMMessages(
+      [...prompts, prompt].map((text) => ({
+        role: "user",
+        parts: [{ text }],
+      }))
+    );
+
+    setLLMMessages((x) => [
+      ...x,
+      {
+        role: "assistant",
+        parts: [{ text: stepUiPrompts[0] }],
+      },
     ]);
   };
 
@@ -238,9 +251,63 @@ const BuilderPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="h-screen flex-1 flex">
-        <div className="w-1/4 bg-gray-900 border-r border-gray-800 overflow-y-auto">
-          <StepsList />
+      <main className="h-5/6 flex-1 flex w-full">
+        <div className="flex flex-col w-1/4 h-full">
+          <div className=" bg-gray-900 border-r border-gray-800 overflow-y-auto h-full flex flex-col items-center justify-center">
+            <div className="">
+              <StepsList />
+            </div>
+          </div>
+          <div className="w-full h-28 flex flex-row items-center justify-center  bg-gray-900 rounded-lg gap-2">
+            <textarea
+              className="p-2 h-22 w-5/6 border border-blue-500  bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-100"
+              placeholder="Make changes to the website here..."
+              value={userPrompt}
+              onChange={(e) => {
+                setPrompt(e.target.value);
+              }}></textarea>
+
+            <Button
+              type="submit"
+              size="sm"
+              className="mt-4 animate-pulse-slow"
+              onClick={async () => {
+                const newMessage: {
+                  role: "user" | "assistant";
+                  parts: [{ text: string }];
+                } = {
+                  role: "user",
+                  parts: [{ text: userPrompt }],
+                };
+
+                const stepResponse = await axios.post(`${BACKEND_URL}/chat`, {
+                  messages: [...llmMessages, newMessage],
+                });
+
+                const { uiPrompts: stepUiPrompts } = stepResponse.data;
+
+                setLLMMessages((x) => [...x, newMessage]);
+                setLLMMessages((x) => [
+                  ...x,
+                  {
+                    role: "assistant",
+                    parts: [{ text: stepUiPrompts[0] }],
+                  },
+                ]);
+
+                setSteps((s) => [
+                  ...s,
+                  ...parseXML(stepUiPrompts[0]).map((x) => ({
+                    ...x,
+                    completed: false,
+                  })),
+                ]);
+
+                setPrompt("");
+              }}>
+              Send
+            </Button>
+          </div>
         </div>
 
         {view === "code" ? (
@@ -249,7 +316,7 @@ const BuilderPage: React.FC = () => {
               <FileExplorer files={files} />
             </div>
 
-            <div className="w-1/2 bg-gray-950 overflow-auto">
+            <div className="w-1/2 h-full bg-gray-950 overflow-auto">
               {activeFile ? (
                 <ContentViewer file={activeFile} />
               ) : (
@@ -260,7 +327,7 @@ const BuilderPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className=" h-screen flex-1 bg-white">
+          <div className=" h-full flex-1 bg-white">
             {webcontainer ? (
               <PreviewFrame webContainer={webcontainer} files={files} />
             ) : (

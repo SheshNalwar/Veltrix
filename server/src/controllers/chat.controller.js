@@ -1,3 +1,4 @@
+
 import { getSystemPrompt } from "../prompt.js";
 import { genAI } from "../../index.js";
 
@@ -53,7 +54,7 @@ Only respond with the custom XML structure.
       model: "gemini-2.0-flash",
       contents: filteredMessages,
       config: {
-        maxOutputTokens: 8000,
+        maxOutputTokens: 20000,
         temperature: 0.7,
       },
       systemInstruction: getSystemPrompt(),
@@ -62,8 +63,7 @@ Only respond with the custom XML structure.
     let aiText = response.text.trim();
 
     // Optional: Remove markdown formatting fences if present
-  aiText = aiText.replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1");
-
+    aiText = aiText.replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1");
 
     console.log("✅ Final AI response:", aiText);
 
