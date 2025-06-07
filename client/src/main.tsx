@@ -1,4 +1,3 @@
-
 import { createRoot } from 'react-dom/client';
 import App from './App.js';
 import { ClerkProvider } from '@clerk/clerk-react'
@@ -12,7 +11,11 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")!).render(
   <>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY} 
+      signInForceRedirectUrl="/landing"
+      signUpForceRedirectUrl="/landing"
+    >
       <App />
     </ClerkProvider>
     <style>

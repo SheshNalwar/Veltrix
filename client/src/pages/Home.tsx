@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "../components/Navbar";
 import CarouselComponent from "../components/Carousel";
 import { Features } from "../components/Features";
 import Orb from "../components/OrbBtn";
 import axios from "axios";
 import { BACKEND_URL } from '../config';
+import Auth from "./Login";
+import { SignInButton, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
   const [isServerOffline, setIsServerOffline] = useState(false);
+  const authRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { isSignedIn } = useUser();
 
   // Function to check if the server is online
   const checkServerStatus = async () => {
@@ -32,10 +38,26 @@ export const Home = () => {
     // Cleanup the interval on component unmount
     return () => clearInterval(interval);
   }, []);
+
+  const handleOrbClick = () => {
+    if (isSignedIn) {
+      navigate('/landing');
+    } else {
+      // Find the button within our Auth component reference
+      const button = authRef.current?.querySelector('button');
+      if (button) {
+        button.click();
+      }
+    }
+  };
+
   return (
     <>
       <div style={{ backgroundColor: "#0C0C0F" }}>
         <Navbar />
+        <div ref={authRef} style={{ display: 'none' }}>
+          <Auth />
+        </div>
         {isServerOffline && (
           <div
             style={{
@@ -67,7 +89,8 @@ export const Home = () => {
           <div className="features_wrapper" style={{ width: "100%" }}>
             <Features />
           </div>
-          <div className="get_start_wrapper">
+          <div className="get_start_wrapper" onClick={handleOrbClick}>
+            
             <div className="get_start_heading">
               Wants to give <br />
               <p>a shot ?</p>{" "}

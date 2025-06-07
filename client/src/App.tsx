@@ -15,9 +15,9 @@ function App() {
       <BuilderProvider>
         <div className="min-h-screen bg-gray-950 text-gray-100">
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/builder" element={<BuilderPage />} />
-            <Route path="/home" element={<Home/>} />
+            <Route path="/" element={<Home/>} />
             <Route path="/auth" element={<Auth/>} />
             <Route path="/subcription" element={<PricingPage/>} />
             {/* <Route path="/auth/users" element={<ClerkUsers/>} />

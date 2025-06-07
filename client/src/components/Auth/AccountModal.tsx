@@ -34,7 +34,7 @@ export default function AccountModal({ isOpen, setIsOpen, user, onUserUpdate }: 
   } : undefined);
 
   const handleSignOut = () => {
-    signOut(() => navigate('/home'));
+    signOut(() => navigate('/'));
   };
   
   // Handle successful update

@@ -4,9 +4,9 @@ export default function Auth() {
   return (
     <header>
       <SignedOut>
-        <SignInButton />
+        <SignInButton  />
       </SignedOut>
-      <SignedIn>
+      <SignedIn >
         <UserButton />
       </SignedIn>
     </header>
