@@ -13,6 +13,8 @@ import { FileNode, Step, StepType } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { useWebContainer } from "../hooks/useWebContainer";
 import { PreviewFrame } from "../components/PreviewFrame";
+import { downloadProjectAsZip } from "../utils/downloadProjectAsZip";
+
 
 const BuilderPage: React.FC = () => {
   const { prompt, activeFile, steps, setSteps } = useBuilder();
@@ -229,6 +231,28 @@ const BuilderPage: React.FC = () => {
             <div className="bg-gray-800 rounded-md px-3 py-1 max-w-md overflow-hidden text-sm text-gray-400">
               <p className="truncate">{prompt}</p>
             </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => downloadProjectAsZip(files)}
+              className="flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+                />
+              </svg>
+              Download ZIP
+            </Button>
+
             <div className="flex bg-gray-800 rounded-md p-1">
               <Button
                 variant={view === "code" ? "primary" : "ghost"}
