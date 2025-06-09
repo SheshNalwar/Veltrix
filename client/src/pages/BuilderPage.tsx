@@ -15,11 +15,12 @@ import { useWebContainer } from "../hooks/useWebContainer";
 import { PreviewFrame } from "../components/PreviewFrame";
 import { downloadProjectAsZip } from "../utils/downloadProjectAsZip";
 
-
 const BuilderPage: React.FC = () => {
   const { prompt, activeFile, steps, setSteps } = useBuilder();
 
   const [userPrompt, setPrompt] = useState("");
+
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [llmMessages, setLLMMessages] = useState<
     { role: "user" | "assistant"; parts: [{ text: string }] }[]
@@ -159,6 +160,7 @@ const BuilderPage: React.FC = () => {
   }, [files, webcontainer]);
 
   const init = async () => {
+    setIsLoadingMore(true); // show loader before fetch
     const response = await axios.post(`${BACKEND_URL}/template`, {
       prompt: prompt.trim(),
     });
@@ -179,14 +181,9 @@ const BuilderPage: React.FC = () => {
       })),
     });
 
-    console.log("step response:", stepResponse.data);
-
     const { uiPrompts: stepUiPrompts } = stepResponse.data;
-    // console.log("stepUiPrompts:", stepUiPrompts);
-    // console.log("stepUI prompts", typeof stepUiPrompts[0]);
 
     const parsedSteps = parseXML(stepUiPrompts[0]);
-    console.log("parsedSteps:", parsedSteps);
 
     setSteps((s) => [
       ...s,
@@ -210,18 +207,57 @@ const BuilderPage: React.FC = () => {
         parts: [{ text: stepUiPrompts[0] }],
       },
     ]);
+
+    setIsLoadingMore(false); // hide loader after steps added
   };
 
   useEffect(() => {
     init();
   }, []);
 
+  const followUpSubmit = async () => {
+    setIsLoadingMore(true); // Start spinner
+    const newMessage: {
+      role: "user" | "assistant";
+      parts: [{ text: string }];
+    } = {
+      role: "user",
+      parts: [{ text: userPrompt }],
+    };
+
+    const stepResponse = await axios.post(`${BACKEND_URL}/chat`, {
+      messages: [...llmMessages, newMessage],
+    });
+
+    const { uiPrompts: stepUiPrompts } = stepResponse.data;
+
+    setLLMMessages((x) => [...x, newMessage]);
+    setLLMMessages((x) => [
+      ...x,
+      {
+        role: "assistant",
+        parts: [{ text: stepUiPrompts[0] }],
+      },
+    ]);
+
+    setSteps((s) => [
+      ...s,
+      ...parseXML(stepUiPrompts[0]).map((x) => ({
+        ...x,
+        completed: false,
+      })),
+    ]);
+
+    setPrompt("");
+    setIsLoadingMore(false); // Stop spinner
+  };
+
   return (
     <div className="h-screen flex flex-col">
       <header className="bg-gray-900 border-b border-gray-800">
         <div className="container mx-auto px-4 py-4 flex items-center">
           <Link
-            to="/"
+            to="/landing"
             className="flex items-center text-gray-400 hover:text-gray-100 mr-4">
             <ArrowLeft size={18} className="mr-1" />
             <span>Back</span>
@@ -277,59 +313,43 @@ const BuilderPage: React.FC = () => {
 
       <main className="h-5/6 flex-1 flex w-full">
         <div className="flex flex-col w-1/4 h-full">
-          <div className=" bg-gray-900 border-r border-gray-800 overflow-y-auto h-full flex flex-col items-center justify-center">
-            <div className="">
-              <StepsList />
+          <div className=" bg-gray-900 border-r border-gray-800 overflow-y-hidden h-full flex flex-col items-center justify-center">
+            <div className="h-full">
+              <StepsList isLoadingMore={isLoadingMore} />
             </div>
           </div>
-          <div className="w-full h-28 flex flex-row items-center justify-center  bg-gray-900 rounded-lg gap-2">
+          <div className="w-full h-28 flex flex-row items-center justify-center bg-gray-900 rounded-lg gap-2">
             <textarea
-              className="p-2 h-22 w-5/6 border border-blue-500  bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-100"
+              className="p-2 h-22 w-5/6 border border-blue-500 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-100"
               placeholder="Make changes to the website here..."
               value={userPrompt}
               onChange={(e) => {
                 setPrompt(e.target.value);
+              }}
+              disabled={isLoadingMore} // <-- disable while loading
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (!isLoadingMore && userPrompt.trim() !== "") {
+                    followUpSubmit();
+                  }
+                }
               }}></textarea>
 
             <Button
               type="submit"
               size="sm"
-              className="mt-4 animate-pulse-slow"
-              onClick={async () => {
-                const newMessage: {
-                  role: "user" | "assistant";
-                  parts: [{ text: string }];
-                } = {
-                  role: "user",
-                  parts: [{ text: userPrompt }],
-                };
-
-                const stepResponse = await axios.post(`${BACKEND_URL}/chat`, {
-                  messages: [...llmMessages, newMessage],
-                });
-
-                const { uiPrompts: stepUiPrompts } = stepResponse.data;
-
-                setLLMMessages((x) => [...x, newMessage]);
-                setLLMMessages((x) => [
-                  ...x,
-                  {
-                    role: "assistant",
-                    parts: [{ text: stepUiPrompts[0] }],
-                  },
-                ]);
-
-                setSteps((s) => [
-                  ...s,
-                  ...parseXML(stepUiPrompts[0]).map((x) => ({
-                    ...x,
-                    completed: false,
-                  })),
-                ]);
-
-                setPrompt("");
+              className="mt-4 flex items-center justify-center"
+              onClick={() => {
+                if (!isLoadingMore && userPrompt.trim() !== "") {
+                  followUpSubmit();
+                }
               }}>
-              Send
+              {isLoadingMore ? (
+                <div className="h-5 w-5 border-4 border-white-400 border-t-blue-500 rounded-full animate-spin"></div>
+              ) : (
+                "Send"
+              )}
             </Button>
           </div>
         </div>

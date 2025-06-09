@@ -15,6 +15,7 @@ export enum StepType {
   EditFile,
   DeleteFile,
   RunScript,
+  ShowNote,
 }
 
 export interface Step {

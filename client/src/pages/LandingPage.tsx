@@ -24,24 +24,19 @@ const LandingPage: React.FC = () => {
             <Code2 className="text-blue-500" size={28} />
             <h1 className="text-xl font-bold">Veltrix</h1>
           </div>
-          <div>
-            <Button variant="ghost" size="sm">
-              Login
-            </Button>
-            <Button size="sm">Sign Up</Button>
-          </div>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4">
-        <div className="max-w-3xl w-full text-center mb-8 animate-fadeIn">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-purple-600 text-transparent bg-clip-text">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 ">
+        <div className="max-w-3xl w-full text-center mb-8 animate-fadeIn ">
+          <h1 className=" mt-24 text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-purple-600 text-transparent bg-clip-text">
             Build Your Website with AI
           </h1>
           <p className="text-xl text-gray-400 mb-8">
-            Describe your website and our AI will generate it for you, complete with code and design.
+            Describe your website and our AI will generate it for you, complete
+            with code and design.
           </p>
-          
+
           <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
             <div className="relative mt-8 mb-4">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-25"></div>
@@ -49,6 +44,12 @@ const LandingPage: React.FC = () => {
                 <textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e as any); // force cast to suppress TS warning
+                    }
+                  }}
                   placeholder="Describe your website idea in detail..."
                   className="w-full p-4 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all min-h-[120px] text-gray-100"
                   required
@@ -62,19 +63,19 @@ const LandingPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full mt-12">
-          <FeatureCard 
+          <FeatureCard
             icon={<Zap className="text-yellow-500" size={24} />}
-            title="Fast Generation" 
+            title="Fast Generation"
             description="Get your website code in seconds with our AI-powered platform."
           />
-          <FeatureCard 
+          <FeatureCard
             icon={<Laptop className="text-green-500" size={24} />}
-            title="Modern Code" 
+            title="Modern Code"
             description="Generate clean, modern code that's ready for production."
           />
-          <FeatureCard 
+          <FeatureCard
             icon={<PaintBucket className="text-purple-500" size={24} />}
-            title="Beautiful Design" 
+            title="Beautiful Design"
             description="Create stunning designs without any design experience."
           />
         </div>

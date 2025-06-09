@@ -62,7 +62,7 @@ export function PreviewFrame({ files, webContainer }: PreviewFrameProps) {
     <div className="h-full flex flex-col items-center justify-center text-gray-800">
       {isLoading && (
         <div className="text-center p-8 bg-gray-100 rounded-lg shadow">
-          <div className="animate-pulse mb-4 h-8 w-8 mx-auto border-4 border-gray-400 border-t-blue-500 rounded-full"></div>
+          <div className="animate-spin mb-4 h-8 w-8 mx-auto border-4 border-gray-400 border-t-blue-500 rounded-full"></div>
           <p className="text-lg font-medium">{status}</p>
           <p className="text-sm text-gray-500 mt-2">
             This may take a few moments...

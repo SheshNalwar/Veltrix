@@ -23,10 +23,15 @@ import { v4 as uuidv4 } from "uuid";
 
 export function parseXML(response: string): Step[] {
   const steps: Step[] = [];
-  // console.log(typeof response); // This will show you the type of response.
-  // console.log(response); // This will show the actual response value.
+  // ✅ Fix: Strip Markdown code block wrapper
+  if (response.startsWith("```")) {
+    response = response
+      .replace(/^```xml\n/, "")
+      .replace(/```$/, "")
+      .trim();
+  }
 
-  // 1. Base "Project Files" step
+  // 1. Add initial Project Files step
   steps.push({
     id: uuidv4(),
     title: "Project Files",
@@ -35,9 +40,9 @@ export function parseXML(response: string): Step[] {
     completed: false,
   });
 
-  // 2. Extract all <boltAction type="file"> elements
+  // 2. Parse all <boltAction type="file" ...> or add/modify types
   const fileActionRegex =
-    /<boltAction[^>]*type="file"[^>]*filePath="([^"]+)"[^>]*>([\s\S]*?)<\/boltAction>/g;
+    /<boltAction[^>]*type="(?:file|add|modify)"[^>]*filePath="([^"]+)"[^>]*>([\s\S]*?)<\/boltAction>/g;
   let match;
 
   while ((match = fileActionRegex.exec(response)) !== null) {
@@ -47,14 +52,14 @@ export function parseXML(response: string): Step[] {
       id: uuidv4(),
       title: `Create ${filePath}`,
       type: StepType.CreateFile,
-      description: `Create the file ${filePath}`,
+      description: `Create or modify the file ${filePath}`,
       completed: false,
       code: content.trim(),
-      path: "/" + filePath, // ✅ Add path
+      path: "/" + filePath,
     });
   }
 
-  // 3. Handle package.json scripts
+  // 3. Parse package.json scripts
   const packageJsonMatch = response.match(
     /<boltAction[^>]*filePath="package\.json"[^>]*>([\s\S]*?)<\/boltAction>/
   );
@@ -78,9 +83,9 @@ export function parseXML(response: string): Step[] {
     }
   }
 
-  // 4. Handle <boltAction type="shell"> commands (optional)
+  // 4. Shell commands
   const shellRegex =
-    /<boltAction[^>]*type="shell"[^>]*>([\s\S]*?)<\/boltAction>/g;
+    /<boltAction[^>]*type="(?:shell|install-dependencies)"[^>]*>([\s\S]*?)<\/boltAction>/g;
   let shellMatch;
   while ((shellMatch = shellRegex.exec(response)) !== null) {
     const shellCode = shellMatch[1].trim();
@@ -94,6 +99,21 @@ export function parseXML(response: string): Step[] {
         code: shellCode,
       });
     }
+  }
+
+  // 5. Update instructions (optional)
+  const updateInstructionsMatch = response.match(
+    /<boltAction[^>]*type="update-instructions"[^>]*>([\s\S]*?)<\/boltAction>/
+  );
+  if (updateInstructionsMatch) {
+    steps.push({
+      id: uuidv4(),
+      title: "Post Setup Instructions",
+      type: StepType.ShowNote,
+      description: "Follow these instructions after setup",
+      completed: false,
+      code: updateInstructionsMatch[1].trim(),
+    });
   }
 
   return steps;

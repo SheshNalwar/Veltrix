@@ -5,6 +5,7 @@ import { BuilderProvider } from './context/BuilderContext';
 import {Home} from './pages/Home'
 import Auth from "./pages/Login"
 import PricingPage from './pages/Pricing';
+import "./index.css";
 // import ClerkUsers from './components/Auth/User';
 // import UpdateName from './components/Auth/User';
 
